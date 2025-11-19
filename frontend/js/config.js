@@ -1,5 +1,5 @@
 const API_CONFIG = {
-    BASE_URL: 'http://localhost:5000',
+    BASE_URL: 'https://learn-cybersecurity-backend.vercel.app',
     ENDPOINTS: {
         SIGNUP: '/api/auth/register',
         SIGNIN: '/api/auth/login'

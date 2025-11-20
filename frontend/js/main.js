@@ -67,6 +67,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+
 // ====== Tabs ======
 const signinTab = document.getElementById('signinTab');
 const signupTab = document.getElementById('signupTab');
@@ -122,6 +123,50 @@ function showMessage(msg, isError = false) {
     setTimeout(() => message.remove(), 3000);
 }
 
+// ====== API Calls ======
+async function apiSignup(userData) {
+    try {
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SIGNUP}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+        });
+        const data = await response.json();
+        if (data.success) {
+            console.log('✅ تم التسجيل بنجاح!');
+            console.log('اسم المستخدم:', data.user.name);
+        } else {
+            console.warn('⚠️ فشل التسجيل:', data.message);
+        }
+        return data;
+    } catch (error) {
+        console.error('❌ خطأ في الاتصال بالباك إند:', error.message);
+        return { success: false, message: 'Error connecting to server' };
+    }
+}
+
+async function apiSignin(credentials) {
+    try {
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SIGNIN}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(credentials)
+        });
+        const data = await response.json();
+        if (data.success) {
+            console.log('✅ تسجيل الدخول ناجح!');
+            console.log('اسم المستخدم:', data.user.name);
+        } else {
+            console.warn('⚠️ فشل تسجيل الدخول:', data.message);
+        }
+        return data;
+    } catch (error) {
+        console.error('❌ خطأ في الاتصال بالباك إند:', error.message);
+        return { success: false, message: 'Error connecting to server' };
+    }
+}
+
+// ====== Form Event Listeners ======
 signinForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const credentials = {
@@ -131,9 +176,10 @@ signinForm?.addEventListener('submit', async (e) => {
     
     const result = await apiSignin(credentials);
     if (result.success) {
+        localStorage.setItem('currentUser', JSON.stringify(result.user));
         localStorage.setItem('token', result.token);
-        showMessage('Success! Redirecting...');
-        setTimeout(() => window.location.href = 'dashboard.html', 2000);
+        showMessage('✅ تم تسجيل الدخول! جاري التحويل...');
+        setTimeout(() => window.location.href = 'dashboard.html', 1500);
     } else {
         showMessage(result.message || 'Login failed', true);
     }
@@ -142,18 +188,15 @@ signinForm?.addEventListener('submit', async (e) => {
 signupForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const userData = {
-        username: document.getElementById('signupUsername').value,
+        name: document.getElementById('signupUsername').value,
         email: document.getElementById('signupEmail').value,
         password: document.getElementById('signupPassword').value
     };
     
     const result = await apiSignup(userData);
     if (result.success) {
-        showMessage('Account created! Redirecting...');
-        setTimeout(() => {
-            localStorage.setItem('firstTime', 'no');
-            showSignIn();
-        }, 2000);
+        showMessage('✅ تم إنشاء الحساب! الرجاء تسجيل الدخول...');
+        setTimeout(() => showSignIn(), 1500);
     } else {
         showMessage(result.message || 'Signup failed', true);
     }

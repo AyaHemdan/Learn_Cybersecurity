@@ -1,145 +1,134 @@
-// // ملف: frontend/js/auth.js - التواصل مع Backend API
 
-// const API_URL = 'http://localhost:5000';
-// // ملف: auth.js - يُحمّل فقط في login.html
-
-// // ====== Sign In / Sign Up Tabs ======
+// // ====== Tabs ======
 // const signinTab = document.getElementById('signinTab');
 // const signupTab = document.getElementById('signupTab');
 // const signinForm = document.getElementById('signinForm');
 // const signupForm = document.getElementById('signupForm');
-// const gotoSignup = document.getElementById('gotoSignup');
-// const gotoSignin = document.getElementById('gotoSignin');
 
-// // Display correct tab based on firstTime
+// function showSignIn() {
+//     if (signinForm) signinForm.style.display = 'block';
+//     if (signupForm) signupForm.style.display = 'none';
+//     if (signinTab) signinTab.classList.add('active');
+//     if (signupTab) signupTab.classList.remove('active');
+// }
+
+// function showSignUp() {
+//     if (signinForm) signinForm.style.display = 'none';
+//     if (signupForm) signupForm.style.display = 'block';
+//     if (signupTab) signupTab.classList.add('active');
+//     if (signinTab) signinTab.classList.remove('active');
+// }
+
 // const firstTime = localStorage.getItem('firstTime');
 // if (!firstTime) {
-//     signupForm?.style.display = 'block';
-//     signinForm?.style.display = 'none';
-//     signupTab?.classList.add('active');
+//     localStorage.setItem('firstTime', 'yes');
+//     showSignUp();
 // } else {
-//     signinForm?.style.display = 'block';
-//     signupForm?.style.display = 'none';
-//     signinTab?.classList.add('active');
+//     showSignIn();
 // }
 
-// // Tab Switching
-// signinTab?.addEventListener('click', () => {
-//     signinForm?.style.display = 'block';
-//     signupForm?.style.display = 'none';
-//     signinTab?.classList.add('active');
-//     signupTab?.classList.remove('active');
-// });
+// signinTab?.addEventListener('click', showSignIn);
+// signupTab?.addEventListener('click', showSignUp);
+// document.getElementById('gotoSignup')?.addEventListener('click', showSignUp);
+// document.getElementById('gotoSignin')?.addEventListener('click', showSignIn);
 
-// signupTab?.addEventListener('click', () => {
-//     signinForm?.style.display = 'none';
-//     signupForm?.style.display = 'block';
-//     signupTab?.classList.add('active');
-//     signinTab?.classList.remove('active');
-// });
-
-// gotoSignup?.addEventListener('click', () => signupTab?.click());
-// gotoSignin?.addEventListener('click', () => signinTab?.click());
-
-// // ====== ✅ Backend API Integration ======
-
-// // تحقق من وجود API_CONFIG
-// if (typeof API_CONFIG === 'undefined') {
-//     console.error('❌ API_CONFIG is not defined! تأكد من تحميل config.js قبل auth.js');
-//     alert('❌ خطأ: ملف config.js غير محمل. تأكد من الترتيب الصحيح في HTML');
+// // ====== Form Submission ======
+// function showMessage(msg, isError = false) {
+//     const existingMsg = document.querySelector('.message');
+//     if (existingMsg) existingMsg.remove();
+    
+//     const message = document.createElement('div');
+//     message.className = 'message';
+//     message.textContent = msg;
+//     message.style.cssText = `
+//         margin-top: 10px;
+//         padding: 10px;
+//         background: ${isError ? '#ff4444' : '#00ff00'};
+//         color: black;
+//         border-radius: 5px;
+//         display: none;
+//         font-weight: bold;
+//     `;
+//     document.getElementById('content').appendChild(message);
+//     message.style.display = 'block';
+//     setTimeout(() => message.remove(), 3000);
 // }
 
-// // ✅ تسجيل حساب جديد (Sign Up)
-// signupForm?.addEventListener('submit', async e => {
-//     e.preventDefault();
-    
-//     const username = document.getElementById('signupUsername')?.value.trim();
-//     const email = document.getElementById('signupEmail')?.value.trim();
-//     const password = document.getElementById('signupPassword')?.value.trim();
-    
-//     if (!username || !email || !password) {
-//         alert('❌ يرجى ملء جميع الحقول');
-//         return;
-//     }
-    
-//     // التحقق من البريد الإلكتروني
-//     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-//     if (!emailRegex.test(email)) {
-//         alert('❌ البريد الإلكتروني غير صحيح');
-//         return;
-//     }
-    
-//     // التحقق من طول كلمة المرور
-//     if (password.length < 6) {
-//         alert('❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-//         return;
-//     }
-    
-//     console.log('🚀 Sending signup request...', { username, email });
-    
+// // ====== API Calls ======
+// async function apiSignup(userData) {
 //     try {
-//         const response = await fetch(API_CONFIG.BASE_URL + '/api/auth/register', {
+//         const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SIGNUP}`, {
 //             method: 'POST',
 //             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({ name: username, email, password })
+//             body: JSON.stringify(userData)
 //         });
-        
 //         const data = await response.json();
-//         console.log('✅ Signup response:', data);
-        
 //         if (data.success) {
-//             localStorage.setItem('token', data.token);
-//             localStorage.setItem('currentUser', JSON.stringify(data.user));
-//             localStorage.setItem('loggedIn', 'true');
-//             localStorage.setItem('firstTime', 'no');
-            
-//             alert('✅ تم إنشاء الحساب بنجاح! جاري التوجه إلى لوحة التحكم...');
-//             window.location.href = 'dashboard.html';
+//             console.log('✅ تم التسجيل بنجاح!');
+//             console.log('اسم المستخدم:', data.user.name);
 //         } else {
-//             alert('❌ ' + data.message);
+//             console.warn('⚠️ فشل التسجيل:', data.message);
 //         }
+//         return data;
 //     } catch (error) {
-//         console.error('❌ Signup error:', error);
-//         alert('❌ حدث خطأ في الاتصال بالسيرفر. تأكد من تشغيل الـ Backend على localhost:5000');
+//         console.error('❌ خطأ في الاتصال بالباك إند:', error.message);
+//         return { success: false, message: 'Error connecting to server' };
+//     }
+// }
+
+// async function apiSignin(credentials) {
+//     try {
+//         const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SIGNIN}`, {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify(credentials)
+//         });
+//         const data = await response.json();
+//         if (data.success) {
+//             console.log('✅ تسجيل الدخول ناجح!');
+//             console.log('اسم المستخدم:', data.user.name);
+//         } else {
+//             console.warn('⚠️ فشل تسجيل الدخول:', data.message);
+//         }
+//         return data;
+//     } catch (error) {
+//         console.error('❌ خطأ في الاتصال بالباك إند:', error.message);
+//         return { success: false, message: 'Error connecting to server' };
+//     }
+// }
+
+// // ====== Form Event Listeners ======
+// signinForm?.addEventListener('submit', async (e) => {
+//     e.preventDefault();
+//     const credentials = {
+//         email: document.getElementById('signinEmail').value,
+//         password: document.getElementById('signinPassword').value
+//     };
+    
+//     const result = await apiSignin(credentials);
+//     if (result.success) {
+//         localStorage.setItem('currentUser', JSON.stringify(result.user));
+//         localStorage.setItem('token', result.token);
+//         showMessage('✅ تم تسجيل الدخول! جاري التحويل...');
+//         setTimeout(() => window.location.href = 'dashboard.html', 1500);
+//     } else {
+//         showMessage(result.message || 'Login failed', true);
 //     }
 // });
 
-// // ✅ تسجيل الدخول (Sign In)
-// signinForm?.addEventListener('submit', async e => {
+// signupForm?.addEventListener('submit', async (e) => {
 //     e.preventDefault();
+//     const userData = {
+//         name: document.getElementById('signupUsername').value,
+//         email: document.getElementById('signupEmail').value,
+//         password: document.getElementById('signupPassword').value
+//     };
     
-//     const email = document.getElementById('signinEmail')?.value.trim();
-//     const password = document.getElementById('signinPassword')?.value.trim();
-    
-//     if (!email || !password) {
-//         alert('❌ يرجى ملء جميع الحقول');
-//         return;
-//     }
-    
-//     console.log('🚀 Sending login request...', { email });
-    
-//     try {
-//         const response = await fetch(API_CONFIG.BASE_URL + '/api/auth/login', {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({ email, password })
-//         });
-        
-//         const data = await response.json();
-//         console.log('✅ Login response:', data);
-        
-//         if (data.success) {
-//             localStorage.setItem('token', data.token);
-//             localStorage.setItem('currentUser', JSON.stringify(data.user));
-//             localStorage.setItem('loggedIn', 'true');
-            
-//             alert('✅ تم تسجيل الدخول بنجاح! جاري التوجه إلى لوحة التحكم...');
-//             window.location.href = 'dashboard.html';
-//         } else {
-//             alert('❌ ' + data.message);
-//         }
-//     } catch (error) {
-//         console.error('❌ Login error:', error);
-//         alert('❌ حدث خطأ في الاتصال بالسيرفر. تأكد من تشغيل الـ Backend على localhost:5000');
+//     const result = await apiSignup(userData);
+//     if (result.success) {
+//         showMessage('✅ تم إنشاء الحساب! الرجاء تسجيل الدخول...');
+//         setTimeout(() => showSignIn(), 1500);
+//     } else {
+//         showMessage(result.message || 'Signup failed', true);
 //     }
 // });

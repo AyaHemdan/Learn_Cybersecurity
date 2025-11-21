@@ -21,7 +21,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173",
     "http://localhost:5174",
-    "لينك الموقع ع الفرونت ",
+    "https://learn-cybersecurity-frontend.vercel.app",
   ],
   methods: ['GET', 'POST', 'PUT','PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
